@@ -126,7 +126,6 @@ class SerialPortSelector(QMainWindow):
         label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)  # Make labels fixed size
         return label
 
-
     def create_combo_box(self, items):
         """Creates and returns a combo box with the given items."""
         combo_box = QComboBox(self)
@@ -189,6 +188,23 @@ class SerialPortSelector(QMainWindow):
         h2_flash_port = self.h2_flash_port_combo_box.currentText()
         h2_flash_baud_rate = self.h2_flash_baud_rate_combo_box.currentText()
         order_id = self.order_id_combo_box.currentText()
+        
+        print(self.utils.tool_path)
+        print(f"Port Flash ESP32S3: {self.utils.port_flashS3}")
+        print(f"Start Address ESP32S3: {self.utils.address_start_erase_flashS3}")
+        print(f"End Address ESP32S3: {self.utils.address_end_erase_flashS3}")
+        print(f"Bootloader Address ESP32S3: {self.utils.address_bootloader_flashS3}")
+        print(f"Partition Table Address ESP32S3: {self.utils.address_partition_table_flashS3}")
+        print(f"OTA Data Initial Address ESP32S3: {self.utils.address_ota_data_initial_flashS3}")
+        print(f"Firmware Address ESP32S3: {self.utils.address_firmware_flashS3}")
+        print("----------------")
+        print(f"Port Flash ESP32H2: {self.utils.port_flashH2}")
+        print(f"Start Address ESP32H2: {self.utils.address_start_erase_flashH2}")
+        print(f"End Address ESP32H2: {self.utils.address_end_erase_flashH2}")
+        print(f"Bootloader Address ESP32H2: {self.utils.address_bootloader_flashH2}")
+        print(f"Partition Table Address ESP32H2: {self.utils.address_partition_table_flashH2}")
+        print(f"Firmware Address ESP32H2: {self.utils.address_firmware_flashH2}")
+        print("----------------")
 
         # Print the selected ports, baud rates, and order ID
         print(f"ESP32S3 Flash : {flash_port} {flash_baud_rate}")
@@ -243,3 +259,4 @@ class SerialPortSelector(QMainWindow):
         if '/dev/ttyUSB2' in ports:
             self.h2_flash_port_combo_box.setCurrentText('/dev/ttyUSB2')
             self.h2_flash_baud_rate_combo_box.setCurrentText('921600')
+            
