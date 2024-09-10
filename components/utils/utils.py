@@ -31,6 +31,14 @@ class Utils:
         self.address_partition_table_flashH2 = ''
         self.address_firmware_flashH2 = ''
         
+        # Flash DAC addresses ESP32-S3
+        self.address_dac_secure_cert_partition = ''
+        self.address_dac_data_provider_partition = ''
+        
+        # Factory port and baud for ESP32-S3
+        self.port_factoryS3 = ''
+        self.baud_factoryS3 = ''
+        
         # Load configuration from the config file
         self.config_reader(config_file)
 
@@ -67,6 +75,12 @@ class Utils:
         self.address_bootloader_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_bootloader_address', self.address_bootloader_flashH2)
         self.address_partition_table_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_partition_table_address', self.address_partition_table_flashH2)
         self.address_firmware_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_address', self.address_firmware_flashH2)
+        
+        self.address_dac_secure_cert_partition = config['flash_dac_esp32s3'].get('flash_dac_esp32s3_secure_cert_partition', self.address_dac_secure_cert_partition)
+        self.address_dac_data_provider_partition = config['flash_dac_esp32s3'].get('flash_dac_esp32s3_data_provider_partition', self.address_dac_data_provider_partition)
+        
+        self.port_factoryS3 = config['factory_esp32s3'].get('factory_esp32s3_port', self.port_factoryS3)
+        self.baud_factoryS3 = config['factory_esp32s3'].get('factory_esp32s3_baud', self.baud_factoryS3)
         
     def check_functionality(self) -> bool:
         """
