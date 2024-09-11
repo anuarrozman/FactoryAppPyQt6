@@ -3,7 +3,8 @@ from PyQt6.QtGui import QAction, QFont
 from PyQt6.QtCore import Qt
 from components.serialcom.serialcom import SerialCommunicator
 from components.utils.utils import Utils
-from components.firmware_flash.flashs3 import FlashFirmwareAndCertThread
+from components.flashS3.flashs3 import FlashFirmwareAndCertThread
+from components.flashH2.flashH2 import FlashFirmwareH2Thread
 
 class SerialPortSelector(QMainWindow):
     def __init__(self):
@@ -217,6 +218,7 @@ class SerialPortSelector(QMainWindow):
         print(f"ESP32H2 Flash : {h2_flash_port} {h2_flash_baud_rate}")
         print(f"Selected Order ID: {order_id}")
         self.start_semi_auto_test()
+        self.start_flash_h2()
         
     def start_semi_auto_test(self):
         """Starts the semi-auto test in a separate thread."""
@@ -239,6 +241,25 @@ class SerialPortSelector(QMainWindow):
         print("Flash process is complete.")
         self.flash_thread.quit()  # Gracefully exit the thread
         self.flash_thread.wait()  # Ensure the thread has finished execution
+
+    def start_flash_h2(self):
+        """Starts the ESP32H2 firmware flashing process in a separate thread."""
+        self.flash_h2_thread = FlashFirmwareH2Thread(
+            self.utils.port_flashH2,
+            self.utils.baud_flashH2,
+            self.utils.address_bootloader_flashH2,
+            self.utils.address_partition_table_flashH2,
+            self.utils.address_firmware_flashH2
+        )
+        self.flash_h2_thread.finished.connect(self.on_flash_h2_finished)
+        self.flash_h2_thread.show_message.connect(self.display_message)
+        self.flash_h2_thread.start()
+        
+    def on_flash_h2_finished(self):
+        """Handles actions after the ESP32H2 firmware flashing thread is finished."""
+        print("ESP32H2 firmware flashing process is complete.")
+        self.flash_h2_thread.quit()
+        self.flash_h2_thread.wait()
         
     def display_message(self, title, message):
         """Displays a message box."""

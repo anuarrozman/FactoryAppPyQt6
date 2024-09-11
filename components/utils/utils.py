@@ -1,6 +1,8 @@
 import subprocess
 import configparser
 import os
+import sqlite3
+
 from typing import List
 
 class Utils:
@@ -10,6 +12,7 @@ class Utils:
         self.order_file_path = ''
         self.filepath_firmwareS3 = ''
         self.filepath_certificatesS3 = ''
+        self.filepath_firmwareH2 = ''
         
         # Erase flash addresses for ESP32-S3 and ESP32-H2
         self.address_start_erase_flashS3 = ''
@@ -76,6 +79,8 @@ class Utils:
         self.address_partition_table_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_partition_table_address', self.address_partition_table_flashS3)
         self.address_ota_data_initial_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_ota_data_initial_address', self.address_ota_data_initial_flashS3)
         self.address_firmware_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_address', self.address_firmware_flashS3)
+        
+        self.filepath_firmwareH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_filepath', self.filepath_firmwareH2)
         self.address_bootloader_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_bootloader_address', self.address_bootloader_flashH2)
         self.address_partition_table_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_partition_table_address', self.address_partition_table_flashH2)
         self.address_firmware_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_address', self.address_firmware_flashH2)
@@ -148,3 +153,65 @@ class Utils:
                     return os.path.join(root, file)
         return None
     
+    def process_device_data(self, device_data_file: str, db_name: str = 'device_data.db') -> None:
+        """
+        Processes the device data from a file and stores it into an SQLite database.
+        
+        Args:
+            device_data_file (str): Path to the file containing device data.
+            db_name (str, optional): Name of the SQLite database file. Defaults to 'device_data.db'.
+        """
+        # Connect to the SQLite database (or create it if it doesn't exist)
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        # Create the table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS devices (
+                order_no TEXT,
+                mac_address TEXT,
+                serial_id TEXT,
+                cert_id TEXT,
+                esp_secure_cert_partition TEXT,
+                commissionable_data_provider_partition TEXT,
+                qrcode TEXT,
+                manualcode TEXT,
+                discriminator INTEGER,
+                passcode INTEGER
+            )
+        ''')
+
+        # Read and parse the device data file
+        try:
+            with open(device_data_file, 'r') as file:
+                for line in file:
+                    if 'order-no' in line:
+                        # Parse each field from the line
+                        order_no = line.split('order-no: ')[1].split(',')[0].strip()
+                        mac_address = line.split('mac-address: ')[1].split(',')[0].strip()
+                        serial_id = line.split('serial-id: ')[1].split(',')[0].strip()
+                        cert_id = line.split('cert-id: ')[1].split(',')[0].strip()
+                        esp_secure_cert_partition = line.split('esp-secure-cert-partition: ')[1].split(',')[0].strip()
+                        commissionable_data_provider_partition = line.split('commissionable-data-provider-partition: ')[1].split(',')[0].strip()
+                        qrcode = line.split('qrcode: ')[1].split(',')[0].strip()
+                        manualcode = line.split('manualcode: ')[1].split(',')[0].strip()
+                        discriminator = int(line.split('discriminator: ')[1].split(',')[0].strip())
+                        passcode = int(line.split('passcode: ')[1].strip())
+
+                        # Insert the data into the database
+                        cursor.execute('''
+                            INSERT INTO devices (order_no, mac_address, serial_id, cert_id, esp_secure_cert_partition,
+                                                commissionable_data_provider_partition, qrcode, manualcode, discriminator, passcode)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ''', (order_no, mac_address, serial_id, cert_id, esp_secure_cert_partition,
+                                commissionable_data_provider_partition, qrcode, manualcode, discriminator, passcode))
+
+        except FileNotFoundError:
+            print(f"File not found: {device_data_file}")
+        except Exception as e:
+            print(f"An error occurred while processing the device data: {e}")
+        finally:
+            # Commit the changes and close the database connection
+            conn.commit()
+            conn.close()
+            print("Device data processing complete and stored in the database.")
