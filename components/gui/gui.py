@@ -3,6 +3,7 @@ from PyQt6.QtGui import QAction, QFont
 from PyQt6.QtCore import Qt
 from components.serialcom.serialcom import SerialCommunicator
 from components.utils.utils import Utils
+from components.firmware_flash.flashs3 import FlashFirmwareAndCertThread
 
 class SerialPortSelector(QMainWindow):
     def __init__(self):
@@ -218,8 +219,35 @@ class SerialPortSelector(QMainWindow):
         self.start_semi_auto_test()
         
     def start_semi_auto_test(self):
-        """Starts the semi-auto test."""
-        print("Starting Semi Auto Test...")
+        """Starts the semi-auto test in a separate thread."""
+        self.flash_thread = FlashFirmwareAndCertThread(
+            self.utils.port_flashS3,
+            self.utils.baud_flashS3,
+            self.utils.address_bootloader_flashS3,
+            self.utils.address_partition_table_flashS3,
+            self.utils.address_ota_data_initial_flashS3,
+            self.utils.address_firmware_flashS3,
+            self.utils.address_dac_secure_cert_partition,
+            self.utils.address_dac_data_provider_partition
+        )
+        self.flash_thread.finished.connect(self.on_flash_finished)
+        self.flash_thread.show_message.connect(self.display_message)
+        self.flash_thread.start()
+
+    def on_flash_finished(self):
+        """Handles actions after the flash thread is finished."""
+        print("Flash process is complete.")
+        self.flash_thread.quit()  # Gracefully exit the thread
+        self.flash_thread.wait()  # Ensure the thread has finished execution
+        
+    def display_message(self, title, message):
+        """Displays a message box."""
+        QMessageBox.information(
+            self,
+            title,
+            message,
+            QMessageBox.StandardButton.Ok
+        )
 
     def print_selected_order_id(self):
         """Prints the currently selected Order ID."""

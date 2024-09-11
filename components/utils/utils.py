@@ -1,5 +1,6 @@
 import subprocess
 import configparser
+import os
 from typing import List
 
 class Utils:
@@ -7,6 +8,8 @@ class Utils:
         # Initialize instance variables with default values
         self.tool_path = ''
         self.order_file_path = ''
+        self.filepath_firmwareS3 = ''
+        self.filepath_certificatesS3 = ''
         
         # Erase flash addresses for ESP32-S3 and ESP32-H2
         self.address_start_erase_flashS3 = ''
@@ -68,6 +71,7 @@ class Utils:
         self.baud_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_baud', self.baud_flashS3)
         self.baud_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_baud', self.baud_flashH2)
         
+        self.filepath_firmwareS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_filepath', self.filepath_firmwareS3)
         self.address_bootloader_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_bootloader_address', self.address_bootloader_flashS3)
         self.address_partition_table_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_partition_table_address', self.address_partition_table_flashS3)
         self.address_ota_data_initial_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_ota_data_initial_address', self.address_ota_data_initial_flashS3)
@@ -76,6 +80,7 @@ class Utils:
         self.address_partition_table_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_partition_table_address', self.address_partition_table_flashH2)
         self.address_firmware_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_address', self.address_firmware_flashH2)
         
+        self.filepath_certificatesS3 = config['flash_dac_esp32s3'].get('flash_cert_esp32s3_filepath', self.filepath_certificatesS3)
         self.address_dac_secure_cert_partition = config['flash_dac_esp32s3'].get('flash_dac_esp32s3_secure_cert_partition', self.address_dac_secure_cert_partition)
         self.address_dac_data_provider_partition = config['flash_dac_esp32s3'].get('flash_dac_esp32s3_data_provider_partition', self.address_dac_data_provider_partition)
         
@@ -135,3 +140,11 @@ class Utils:
             print(f"An error occurred while reading the file: {e}")
         
         return order_numbers
+
+    def find_bin_path(self, keyword, search_directory):
+        for root, dirs, files in os.walk(search_directory):
+            for file in files:
+                if file.endswith(".bin") and keyword in file:
+                    return os.path.join(root, file)
+        return None
+    
