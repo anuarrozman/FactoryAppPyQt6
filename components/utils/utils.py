@@ -28,6 +28,10 @@ class Utils:
         self.baud_flashS3 = ''
         self.baud_flashH2 = ''
         
+        # Flash Command
+        self.command_flashS3 = ''
+        self.command_flashH2 = ''
+        
         # Flash firmware addresses for ESP32-S3 and ESP32-H2
         self.address_bootloader_flashS3 = ''
         self.address_partition_table_flashS3 = ''
@@ -61,6 +65,9 @@ class Utils:
         # Read values from the config file and store them in instance variables
         self.tool_path = config['DEFAULT'].get('tool_path', self.tool_path)
         self.order_file_path = config['DEFAULT'].get('order_file_path', self.order_file_path)
+        
+        self.command_flashS3 = config['flash_firmware_esp32s3'].get('flash_firmware_esp32s3_command', self.command_flashS3)
+        self.command_flashH2 = config['flash_firmware_esp32h2'].get('flash_firmware_esp32h2_command', self.command_flashH2)
         
         self.address_start_erase_flashS3 = config['erase_flash_esp32s3'].get('erase_flash_esp32s3_start_address', self.address_start_erase_flashS3)
         self.address_end_erase_flashS3 = config['erase_flash_esp32s3'].get('erase_flash_esp32s3_end_address', self.address_end_erase_flashS3)
@@ -215,3 +222,37 @@ class Utils:
             conn.commit()
             conn.close()
             print("Device data processing complete and stored in the database.")
+            
+    def esptool_read_mac(self, port: str, baud: int) -> str:
+        """
+        Read the MAC address of the ESP32 device using esptool.
+        
+        Args:
+            port (str): Port where the ESP32 device is connected.
+            baud (int): Baud rate for the serial communication.
+        
+        Returns:
+            str: MAC address of the ESP32 device.
+        """
+        try:
+            # Run esptool to read the MAC address
+            result = subprocess.run(
+                [self.tool_path, '--port', port, '--baud', str(baud), 'read_mac'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
+
+            # Extract the MAC address from the output
+            for line in result.stdout.splitlines():
+                if "MAC:" in line:
+                    mac_address = line.split('MAC: ')[1].strip()
+                    print(f"MAC address: {mac_address}")
+                    return mac_address
+
+            # If MAC address is not found in the output
+            print("MAC address not found in the output.")
+            return None
+
+        except Exception as e:
+            print(f"An error occurred while reading the MAC address: {e}")
+            return None
+            

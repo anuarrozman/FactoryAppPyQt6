@@ -3,9 +3,7 @@ from PyQt6.QtGui import QAction, QFont
 from PyQt6.QtCore import Qt
 from components.serialcom.serialcom import SerialCommunicator
 from components.utils.utils import Utils
-from components.flashS3.flashs3 import FlashFirmwareAndCertThread
-from components.flashH2.flashH2 import FlashFirmwareH2Thread
-
+from components.flash.flash import FlashFirmwareAndCertThread, FlashFirmwareH2Thread
 class SerialPortSelector(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -108,6 +106,11 @@ class SerialPortSelector(QMainWindow):
         esptool_action = QAction("Check esptool", self)
         esptool_action.triggered.connect(self.check_esptool)
         file_menu.addAction(esptool_action)
+        
+        # Use a lambda to delay the execution of process_device_data
+        load_device_data_action = QAction("Load Device Data", self)
+        load_device_data_action.triggered.connect(lambda: self.utils.process_device_data('device_data.txt'))
+        file_menu.addAction(load_device_data_action)
 
         # Help menu
         help_menu = menu_bar.addMenu("Help")
@@ -162,6 +165,16 @@ class SerialPortSelector(QMainWindow):
         if group_type == "semi_auto_test":
             # Add widgets or layout specific to Semi Auto Test
             layout.addWidget(QLabel("Placeholder for Semi Auto Test", self))  # Example placeholder
+            self.esp32s3_mac_address_label = QLabel("ESP32-S3 Mac Address: <empty>")
+            layout.addWidget(self.esp32s3_mac_address_label)
+            self.esp32h2_mac_address_label = QLabel("ESP32-H2 Mac Address: <empty>")
+            layout.addWidget(self.esp32h2_mac_address_label) 
+            self.esp32s3_firmware_flash_label = QLabel("ESP32-S3 Firmware Flash: <empty>")
+            layout.addWidget(self.esp32s3_firmware_flash_label)
+            self.esp32s3_certificate_flash_label = QLabel("ESP32-S3 Certificate Flash: <empty>")
+            layout.addWidget(self.esp32s3_certificate_flash_label)
+            self.esp32h2_firmware_flash_label = QLabel("ESP32-H2 Firmware Flash: <empty>")
+            layout.addWidget(self.esp32h2_firmware_flash_label)      
         elif group_type == "manual_test":
             # Add widgets or layout specific to Manual Test
             layout.addWidget(QLabel("Placeholder for Manual Test", self))  # Example placeholder
@@ -183,7 +196,7 @@ class SerialPortSelector(QMainWindow):
 
     def start_flash(self):
         """Stores and prints the selected ports, baud rates, and order ID."""
-        flash_port = self.flash_port_combo_box.currentText()
+        s3_flash_port = self.flash_port_combo_box.currentText()
         flash_baud_rate = self.flash_baud_rate_combo_box.currentText()
         factory_port = self.factory_port_combo_box.currentText()
         factory_baud_rate = self.factory_baud_rate_combo_box.currentText()
@@ -213,10 +226,14 @@ class SerialPortSelector(QMainWindow):
         print("----------------")
 
         # Print the selected ports, baud rates, and order ID
-        print(f"ESP32S3 Flash : {flash_port} {flash_baud_rate}")
+        print(f"ESP32S3 Flash : {s3_flash_port} {flash_baud_rate}")
         print(f"ESP32S3 Factory : {factory_port} {factory_baud_rate}")
         print(f"ESP32H2 Flash : {h2_flash_port} {h2_flash_baud_rate}")
         print(f"Selected Order ID: {order_id}")
+        
+        print("----------------")
+        self.read_mac_address(self.utils.port_flashS3, self.utils.baud_flashS3)
+        self.read_mac_address(self.utils.port_flashH2, self.utils.baud_flashH2)
         self.start_semi_auto_test()
         self.start_flash_h2()
         
@@ -233,12 +250,14 @@ class SerialPortSelector(QMainWindow):
             self.utils.address_dac_data_provider_partition
         )
         self.flash_thread.finished.connect(self.on_flash_finished)
-        self.flash_thread.show_message.connect(self.display_message)
+        # self.flash_thread.show_message.connect(self.display_message)
         self.flash_thread.start()
 
     def on_flash_finished(self):
         """Handles actions after the flash thread is finished."""
         print("Flash process is complete.")
+        self.esp32s3_firmware_flash_label.setText("ESP32-S3 Firmware Flash: Completed")
+        self.esp32s3_certificate_flash_label.setText("ESP32-S3 Certificate Flash: Completed")
         self.flash_thread.quit()  # Gracefully exit the thread
         self.flash_thread.wait()  # Ensure the thread has finished execution
 
@@ -247,19 +266,31 @@ class SerialPortSelector(QMainWindow):
         self.flash_h2_thread = FlashFirmwareH2Thread(
             self.utils.port_flashH2,
             self.utils.baud_flashH2,
+            self.utils.command_flashH2,
             self.utils.address_bootloader_flashH2,
             self.utils.address_partition_table_flashH2,
             self.utils.address_firmware_flashH2
         )
         self.flash_h2_thread.finished.connect(self.on_flash_h2_finished)
-        self.flash_h2_thread.show_message.connect(self.display_message)
+        # self.flash_h2_thread.show_message.connect(self.display_message)
         self.flash_h2_thread.start()
         
     def on_flash_h2_finished(self):
         """Handles actions after the ESP32H2 firmware flashing thread is finished."""
         print("ESP32H2 firmware flashing process is complete.")
+        self.esp32h2_firmware_flash_label.setText("ESP32-H2 Firmware Flash: Completed")
         self.flash_h2_thread.quit()
         self.flash_h2_thread.wait()
+        
+    def read_mac_address(self, port, baud):
+        """Reads the MAC address of the ESP32-S3."""
+        mac_address = self.utils.esptool_read_mac(port, baud)
+        if port == self.utils.port_flashS3:
+            self.esp32s3_mac_address_label.setText(f"ESP32-S3 Mac Address: {mac_address}")
+        if port == self.utils.port_flashH2:
+            self.esp32h2_mac_address_label.setText(f"ESP32-H2 Mac Address: {mac_address}")
+        else:
+            pass
         
     def display_message(self, title, message):
         """Displays a message box."""
