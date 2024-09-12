@@ -17,6 +17,8 @@ class FlashFirmwareAndCertThread(QThread):
         self.firmware_address = firmware_address
         self.secure_cert_partition_address = secure_cert_partition_address
         self.data_provider_partition_address = data_provider_partition_address
+        self.success_detected_firmware = False  # Initialize instance variable
+        self.success_detected_certificate = False  # Initialize instance variable
 
     def run(self):
         """Runs the firmware and certificate flashing processes."""
@@ -53,19 +55,21 @@ class FlashFirmwareAndCertThread(QThread):
             self.firmware_address, self.utils.find_bin_path('rc', self.utils.filepath_firmwareS3)
         ]
         
+        print(f"Command: {' '.join(command)}")
+        
         try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            success_detected = False
+            self.success_detected_firmware = False  # Reset success_detected before starting
             for line in process.stdout:
                 print(line, end='')
                 if "Hard resetting via RTS pin..." in line:
-                    success_detected = True
+                    self.success_detected_firmware = True
             process.wait()
             if process.returncode != 0:
                 error_output = process.stderr.read()
                 self.show_message.emit("Error", f"An error occurred while flashing the firmware: {error_output}")
                 return False
-            return success_detected
+            return self.success_detected_firmware
         except Exception as e:
             self.show_message.emit("Error", f"An unexpected error occurred: {str(e)}")
             return False
@@ -89,21 +93,20 @@ class FlashFirmwareAndCertThread(QThread):
         
         try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            success_detected = False
+            self.success_detected_certificate = False  # Reset success_detected before starting
             for line in process.stdout:
                 print(line, end='')
                 if "Hard resetting via RTS pin..." in line:
-                    success_detected = True
+                    self.success_detected_certificate = True
             process.wait()
             if process.returncode != 0:
                 error_output = process.stderr.read()
                 self.show_message.emit("Error", f"An error occurred while flashing the certificate: {error_output}")
                 return False
-            return success_detected
+            return self.success_detected_certificate
         except Exception as e:
             self.show_message.emit("Error", f"An unexpected error occurred: {str(e)}")
             return False
-        
 class FlashFirmwareH2Thread(QThread):
     finished = pyqtSignal()
     show_message = pyqtSignal(str, str)  # Signal for showing messages
@@ -117,6 +120,7 @@ class FlashFirmwareH2Thread(QThread):
         self.bootloader_address = bootloader_address
         self.partition_table_address = partition_table_address
         self.firmware_address = firmware_address
+        self.success_detected = False  # Initialize instance variable
 
     def run(self):
         """Runs the firmware flashing processes."""      
@@ -145,19 +149,21 @@ class FlashFirmwareH2Thread(QThread):
             self.firmware_address, self.utils.find_bin_path('H2', self.utils.filepath_firmwareH2)
         ]
         
+        print(f"Command: {command}")
+        
         try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            success_detected = False
+            self.success_detected = False  # Reset success_detected before starting
             for line in process.stdout:
                 print(line, end='')
                 if "Hard resetting via RTS pin..." in line:
-                    success_detected = True
+                    self.success_detected = True
             process.wait()
             if process.returncode != 0:
                 error_output = process.stderr.read()
-                self.show_message.emit("Error", f"An error occurred while flashing the firmware: {error_output}")
+                self.show_message.emit("Error", f"An error occurred while flashing the certificate: {error_output}")
                 return False
-            return success_detected
+            return self.success_detected
         except Exception as e:
             self.show_message.emit("Error", f"An unexpected error occurred: {str(e)}")
             return False

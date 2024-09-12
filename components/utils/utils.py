@@ -222,7 +222,7 @@ class Utils:
             conn.commit()
             conn.close()
             print("Device data processing complete and stored in the database.")
-            
+                        
     def esptool_read_mac(self, port: str, baud: int) -> str:
         """
         Read the MAC address of the ESP32 device using esptool.
@@ -255,4 +255,29 @@ class Utils:
         except Exception as e:
             print(f"An error occurred while reading the MAC address: {e}")
             return None
+    
+    def esptool_reboot(self, port: str, baud: int) -> None:
+        """
+        Reboot the ESP32 device using esptool.
+        
+        Args:
+            port (str): Port where the ESP32 device is connected.
+            baud (int): Baud rate for the serial communication.
+        """
+        try:
+            # Run esptool to reboot the device
+            result = subprocess.run(
+                [self.tool_path, '--port', port, '--baud', str(baud), 'run'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
+
+            print(f"Command output: {result.stdout.strip()}")
             
+            # Check if the device is successfully rebooted
+            if "Hard resetting via RTS pin..." in result.stdout:
+                print("Device rebooted successfully.")
+            else:
+                print("Device reboot failed.")
+                
+        except Exception as e:
+            print(f"An error occurred while rebooting the device: {e}")
