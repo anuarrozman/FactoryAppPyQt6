@@ -1,11 +1,14 @@
 import serial
 import serial.tools.list_ports
+import time
 
 from PyQt6.QtCore import QThread, pyqtSignal
+from components.utils.utils import Utils
 
 
 class SerialCommunicator:
     def __init__(self):
+        self.utils = Utils()
         self.serial_ports = self.get_serial_ports()
         self.ser = None  # Initialize serial object to None
 
@@ -17,8 +20,6 @@ class SerialCommunicator:
     def get_serial_ports_as_str(self):
         """Returns a list of available serial ports as strings."""
         return self.get_serial_ports()
-
-
 
 class SerialReaderThread(QThread):
     data_received = pyqtSignal(str)
@@ -47,6 +48,7 @@ class SerialReaderThread(QThread):
                     # Emit the signal with the received data
                     self.data_received.emit(data)
                     if data == ".":
+                        self.write_data("polyaire&ADT\r\n")
                         self.factory_status = True
                         self.factory_status_changed.emit(self.factory_status)  # Emit status change
         except serial.SerialException as e:
@@ -58,3 +60,11 @@ class SerialReaderThread(QThread):
         if self.serial_conn and self.serial_conn.is_open:
             self.serial_conn.close()
             self.serial_conn = None
+    
+    def write_data(self, data_to_write):
+        """Write data to the serial port."""
+        if self.serial_conn and self.serial_conn.is_open:
+            print(f"Writing to serial: {data_to_write}")
+            self.serial_conn.write(data_to_write.encode('utf-8'))
+        else:
+            print("Serial port is not open. Cannot write data.")

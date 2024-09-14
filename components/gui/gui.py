@@ -3,7 +3,7 @@ from PyQt6.QtGui import QAction, QFont
 from PyQt6.QtCore import Qt
 from components.serialcom.serialcom import SerialCommunicator, SerialReaderThread
 from components.utils.utils import Utils
-from components.flash.flash import FlashFirmwareAndCertThread, FlashFirmwareH2Thread
+from components.flash.flash import FlashFirmwareS3Thread, FlashFirmwareH2Thread
 class SerialPortSelector(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -217,6 +217,46 @@ class SerialPortSelector(QMainWindow):
             factory_mode_layout_s3.addWidget(self.esp32s3_factory_mode_result)
             layout.addLayout(factory_mode_layout_s3)
             
+            # ESP32-S3 Read Mac Address
+            self.esp32s3_read_mac_address_label = QLabel("ESP32-S3 Read Mac Address:")
+            self.esp32s3_read_mac_address_result = QLabel("<pending>")  # Mac address result
+            read_mac_address_layout_s3 = QHBoxLayout()
+            read_mac_address_layout_s3.addWidget(self.esp32s3_read_mac_address_label)
+            read_mac_address_layout_s3.addWidget(self.esp32s3_read_mac_address_result)
+            layout.addLayout(read_mac_address_layout_s3)
+            
+            # ESP32-S3 Read Product Name
+            self.esp32s3_read_product_name_label = QLabel("ESP32-S3 Read Product Name:")
+            self.esp32s3_read_product_name_result = QLabel("<pending>")  # Product name result
+            read_product_name_layout_s3 = QHBoxLayout()
+            read_product_name_layout_s3.addWidget(self.esp32s3_read_product_name_label)
+            read_product_name_layout_s3.addWidget(self.esp32s3_read_product_name_result)
+            layout.addLayout(read_product_name_layout_s3)
+            
+            # ESP32-S3 Write Serial Number
+            self.esp32s3_write_serial_number_label = QLabel("ESP32-S3 Write Serial Number:")
+            self.esp32s3_write_serial_number_result = QLabel("<pending>")  # Serial number result
+            write_serial_number_layout_s3 = QHBoxLayout()
+            write_serial_number_layout_s3.addWidget(self.esp32s3_write_serial_number_label)
+            write_serial_number_layout_s3.addWidget(self.esp32s3_write_serial_number_result)
+            layout.addLayout(write_serial_number_layout_s3)
+            
+            # ESP32-S3 Write Matter QR
+            self.esp32s3_write_matter_qr_label = QLabel("ESP32-S3 Write Matter QR:")
+            self.esp32s3_write_matter_qr_result = QLabel("<pending>")  # Matter QR result
+            write_matter_qr_layout_s3 = QHBoxLayout()
+            write_matter_qr_layout_s3.addWidget(self.esp32s3_write_matter_qr_label)
+            write_matter_qr_layout_s3.addWidget(self.esp32s3_write_matter_qr_result)
+            layout.addLayout(write_matter_qr_layout_s3)
+            
+            # ESP32-S3 Save Device Data
+            self.esp32s3_save_device_data_label = QLabel("ESP32-S3 Save Device Data:")
+            self.esp32s3_save_device_data_result = QLabel("<pending>")  # Save device data result
+            save_device_data_layout_s3 = QHBoxLayout()
+            save_device_data_layout_s3.addWidget(self.esp32s3_save_device_data_label)
+            save_device_data_layout_s3.addWidget(self.esp32s3_save_device_data_result)
+            layout.addLayout(save_device_data_layout_s3)
+            
         elif group_type == "manual_test":
             # Add widgets or layout specific to Manual Test
             layout.addWidget(QLabel("Placeholder for Manual Test", self))  # Example placeholder
@@ -274,6 +314,8 @@ class SerialPortSelector(QMainWindow):
         print(f"Selected Order ID: {order_id}")
         
         print("----------------")
+        print("Factory Command")
+        print(f"Factory Command: {self.utils.command_factory_password}")
         
         self.semi_auto_test()
 
@@ -298,7 +340,7 @@ class SerialPortSelector(QMainWindow):
         
     def start_flash_s3(self):
         """Starts the semi-auto test in a separate thread."""
-        self.flash_thread = FlashFirmwareAndCertThread(
+        self.flash_thread = FlashFirmwareS3Thread(
             self.utils.port_flashS3,
             self.utils.baud_flashS3,
             self.utils.address_bootloader_flashS3,

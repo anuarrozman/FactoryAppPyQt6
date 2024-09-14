@@ -32,6 +32,9 @@ class Utils:
         self.command_flashS3 = ''
         self.command_flashH2 = ''
         
+        # Factory Command
+        self.command_factory_password = ''
+        
         # Flash firmware addresses for ESP32-S3 and ESP32-H2
         self.address_bootloader_flashS3 = ''
         self.address_partition_table_flashS3 = ''
@@ -98,6 +101,8 @@ class Utils:
         
         self.port_factoryS3 = config['factory_esp32s3'].get('factory_esp32s3_port', self.port_factoryS3)
         self.baud_factoryS3 = config['factory_esp32s3'].get('factory_esp32s3_baud', self.baud_factoryS3)
+        
+        self.command_factory_password = config['factory_esp32s3'].get('factory_esp32s3_password', self.command_factory_password)
         
     def check_functionality(self) -> bool:
         """

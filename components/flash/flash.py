@@ -2,7 +2,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 import subprocess
 from components.utils.utils import Utils
 
-class FlashFirmwareAndCertThread(QThread):
+class FlashFirmwareS3Thread(QThread):
     finished = pyqtSignal()
     show_message = pyqtSignal(str, str)  # Signal for showing messages
 
@@ -107,6 +107,7 @@ class FlashFirmwareAndCertThread(QThread):
         except Exception as e:
             self.show_message.emit("Error", f"An unexpected error occurred: {str(e)}")
             return False
+        
 class FlashFirmwareH2Thread(QThread):
     finished = pyqtSignal()
     show_message = pyqtSignal(str, str)  # Signal for showing messages
