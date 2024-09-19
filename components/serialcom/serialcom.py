@@ -48,7 +48,8 @@ class SerialReaderThread(QThread):
                     # Emit the signal with the received data
                     self.data_received.emit(data)
                     if data == ".":
-                        self.write_data("polyaire&ADT\r\n")
+                        self.write_data("polyaire&ADT\r\n") # Factory Mode Password
+                        self.write_data(" FF:3;RGB-1\r\n") # Set RGB to red for testing
                         self.factory_status = True
                         self.factory_status_changed.emit(self.factory_status)  # Emit status change
         except serial.SerialException as e:
