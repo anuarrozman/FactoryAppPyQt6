@@ -40,19 +40,19 @@ class SerialPortSelector(QMainWindow):
         self.order_id_combo_box.currentIndexChanged.connect(self.print_selected_order_id)
         
         # Group 1: Semi Auto Test
-        self.semi_auto_test_label = self.create_label("Semi Auto Test", font_size=14, bold=True)
+        self.semi_auto_test_label = self.create_label("Semi Auto Test")
         self.semi_auto_test_group = self.create_group_box(self.semi_auto_test_label, "semi_auto_test")
         
         # Group 2: Manual Test
-        self.manual_test_label = self.create_label("Manual Test", font_size=14, bold=True)
+        self.manual_test_label = self.create_label("Manual Test")
         self.manual_test_group = self.create_group_box(self.manual_test_label, "manual_test")
         
         # Group 3: Wi-Fi Test
-        self.wifi_test_label = self.create_label("Wi-Fi Test", font_size=14, bold=True)
+        self.wifi_test_label = self.create_label("Wi-Fi Test")
         self.wifi_test_group = self.create_group_box(self.wifi_test_label, "wifi_test")
         
         # Group 4: ESP32H2 Test
-        self.esp32h2_test_label = self.create_label("ESP32H2 Test", font_size=14, bold=True)
+        self.esp32h2_test_label = self.create_label("ESP32H2 Test")
         self.esp32h2_test_group = self.create_group_box(self.esp32h2_test_label, "esp32h2_test")
         
         self.start_button = self.create_start_button()
