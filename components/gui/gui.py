@@ -18,23 +18,23 @@ class SerialPortSelector(QMainWindow):
         self.serial_thread = None
 
         # Create GUI components
-        # self.flash_port_label = self.create_label("ESP32S3 Flash Port    :")
-        # self.flash_port_combo_box = self.create_combo_box(self.serialcom.get_serial_ports_as_str())
-        # self.flash_baud_rate_label = self.create_label("Baud Rate:")
-        # self.flash_baud_rate_combo_box = self.create_baud_rate_combo_box()
+        self.flash_port_label = self.create_label("ESP32S3 Flash Port    :")
+        self.flash_port_combo_box = self.create_combo_box(self.serialcom.get_serial_ports_as_str())
+        self.flash_baud_rate_label = self.create_label("Baud Rate:")
+        self.flash_baud_rate_combo_box = self.create_baud_rate_combo_box()
 
-        # self.factory_port_label = self.create_label("ESP32S3 Factory Port:")
-        # self.factory_port_combo_box = self.create_combo_box(self.serialcom.get_serial_ports_as_str())
-        # self.factory_baud_rate_label = self.create_label("Baud Rate:")
-        # self.factory_baud_rate_combo_box = self.create_baud_rate_combo_box()
+        self.factory_port_label = self.create_label("ESP32S3 Factory Port:")
+        self.factory_port_combo_box = self.create_combo_box(self.serialcom.get_serial_ports_as_str())
+        self.factory_baud_rate_label = self.create_label("Baud Rate:")
+        self.factory_baud_rate_combo_box = self.create_baud_rate_combo_box()
 
-        # self.h2_flash_port_label = self.create_label("ESP32H2 Flash Port    :")
-        # self.h2_flash_port_combo_box = self.create_combo_box(self.serialcom.get_serial_ports_as_str())
-        # self.h2_flash_baud_rate_label = self.create_label("Baud Rate:")
-        # self.h2_flash_baud_rate_combo_box = self.create_baud_rate_combo_box()
+        self.h2_flash_port_label = self.create_label("ESP32H2 Flash Port    :")
+        self.h2_flash_port_combo_box = self.create_combo_box(self.serialcom.get_serial_ports_as_str())
+        self.h2_flash_baud_rate_label = self.create_label("Baud Rate:")
+        self.h2_flash_baud_rate_combo_box = self.create_baud_rate_combo_box()
 
-        # self.order_id_label = self.create_label("Order ID:")
-        # self.order_id_combo_box = self.create_combo_box(self.utils.read_order('device_data.txt'))
+        self.order_id_label = self.create_label("Order ID:")
+        self.order_id_combo_box = self.create_combo_box(self.utils.read_order('device_data.txt'))
         
         # Connect signal to print selected order ID
         self.order_id_combo_box.currentIndexChanged.connect(self.print_selected_order_id)
@@ -61,16 +61,16 @@ class SerialPortSelector(QMainWindow):
         main_layout = QVBoxLayout()
         
         # Create layouts for each section
-        # flash_port_layout = self.create_section_layout(self.flash_port_label, self.flash_port_combo_box, self.flash_baud_rate_label, self.flash_baud_rate_combo_box)
-        # factory_port_layout = self.create_section_layout(self.factory_port_label, self.factory_port_combo_box, self.factory_baud_rate_label, self.factory_baud_rate_combo_box)
-        # h2_flash_port_layout = self.create_section_layout(self.h2_flash_port_label, self.h2_flash_port_combo_box, self.h2_flash_baud_rate_label, self.h2_flash_baud_rate_combo_box)
-        # order_id_layout = self.create_section_layout(self.order_id_label, self.order_id_combo_box, None, None)
+        flash_port_layout = self.create_section_layout(self.flash_port_label, self.flash_port_combo_box, self.flash_baud_rate_label, self.flash_baud_rate_combo_box)
+        factory_port_layout = self.create_section_layout(self.factory_port_label, self.factory_port_combo_box, self.factory_baud_rate_label, self.factory_baud_rate_combo_box)
+        h2_flash_port_layout = self.create_section_layout(self.h2_flash_port_label, self.h2_flash_port_combo_box, self.h2_flash_baud_rate_label, self.h2_flash_baud_rate_combo_box)
+        order_id_layout = self.create_section_layout(self.order_id_label, self.order_id_combo_box, None, None)
         
         # Add layouts for each section
-        # main_layout.addLayout(flash_port_layout)
-        # main_layout.addLayout(factory_port_layout)
-        # main_layout.addLayout(h2_flash_port_layout)
-        # main_layout.addLayout(order_id_layout)
+        main_layout.addLayout(flash_port_layout)
+        main_layout.addLayout(factory_port_layout)
+        main_layout.addLayout(h2_flash_port_layout)
+        main_layout.addLayout(order_id_layout)
         
         # Create a horizontal layout for Semi Auto Test and Manual Test
         test_group_layout = QHBoxLayout()
